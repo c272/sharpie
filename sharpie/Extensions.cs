@@ -21,7 +21,7 @@ namespace sharpie
             // Handles negative ends.
             if (end <= -1)
             {
-                end = source.Length - 1;
+                end = source.Length;
             }
             int len = end - start;
 

@@ -22,8 +22,8 @@ namespace sharpie
             Directory.CreateDirectory(Constants.SourcesLocation);
 
             //Create Sharpie files, if not already there.
-            File.Create(Constants.SourcesFile);
-
+            File.WriteAllText(Constants.SourcesFile, "");
+       
             //Switching over main argument to find command.
             switch (args[0])
             {

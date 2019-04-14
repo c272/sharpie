@@ -33,13 +33,12 @@ namespace sharpie
 
         private static void AddSource(string[] sources)
         {
-            //Adding a source to the base list.
-            File.AppendAllLines(Constants.SourcesFile, sources);
-
-            //Pull all the given sources, and add them to the source file.
+           //Pull all the given sources, and add them to the source file.
             foreach (string source in sources)
             {
+                Console.WriteLine(source);
                 //Connect and stream source.
+                //TODO: Catch the stream failing due to bad address.
                 var client = new WebClient();
                 Stream stream = client.OpenRead(source);
                 var sr = new StreamReader(stream);
@@ -50,11 +49,15 @@ namespace sharpie
 
                 //Getting the name of the source file and adding to sources list file.
                 string sourceName = srcString.Split("\n")[0];
+                //Clearing rubbish from the source name.
+                sourceName = sourceName.Replace("\r", "").Replace("\n", "");
                 File.AppendAllText(Constants.SourcesFile, sourceName + "|" + source + "\n");
 
                 //Writing source contents into source directory.
                 File.WriteAllText(Constants.SourcesLocation + sourceName + ".txt", srcString);
             }
+
+            Console.WriteLine("Added the given sources to Sharpie.\nCount: " + sources.Length);
         }
 
         private static void Update()
