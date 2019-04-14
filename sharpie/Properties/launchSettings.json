@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "sharpie": {
+      "commandName": "Project",
+      "commandLineArgs": "add"
+    }
+  }
+}
