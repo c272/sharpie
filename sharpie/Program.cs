@@ -22,7 +22,7 @@ namespace sharpie
             Directory.CreateDirectory(Constants.SourcesLocation);
 
             //Create Sharpie files, if not already there.
-            File.WriteAllText(Constants.SourcesFile, "");
+            File.AppendAllText(Constants.SourcesFile, "");
        
             //Switching over main argument to find command.
             switch (args[0])

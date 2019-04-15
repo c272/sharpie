@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -26,6 +27,9 @@ namespace sharpie
                 case "remove":
                     RemoveSource(args.Slice(1, -1));
                     break;
+                case "update":
+                    Update();
+                    break;
                 default:
                     Console.WriteLine("S_ERR: Invalid parameter passed to sources.\n" +
                         "For more information on sources, use --help sources");
@@ -33,14 +37,46 @@ namespace sharpie
             }
         }
 
+        /// <summary>
+        /// Lists all the sources currently in the sources.txt file.
+        /// </summary>
         private static void ListSources()
         {
-            throw new NotImplementedException();
+            Console.WriteLine("Sharpie \"sources.txt\" List");
+            Console.WriteLine("----------------------------");
+            Console.WriteLine("FORMAT: Name | Source | Priority");
+
+            List<Source> sources = GetSources();
+            foreach (var source in sources)
+            {
+                Console.WriteLine(source.Name + " | " + source.Link + " | " + source.Priority);
+            }
+
+            Console.WriteLine("----------------------------");
         }
 
         private static void RemoveSource(string[] sources)
         {
-            throw new NotImplementedException();
+            //Get the sources from file.
+            List<Source> sourcesList = GetSources();
+
+            //Foreach and remove the source.
+            foreach (var source in sources)
+            {
+                if (sourcesList.RemoveAll(x => x.Name == source)==0)
+                {
+                    Console.WriteLine("S_ERR: Failed to remove source \"" + source + "\", does not exist in sources.txt master list.");
+                }
+            }
+
+            //Writing sources back to file.
+            string toWrite = "";
+            foreach (var source in sourcesList)
+            {
+                toWrite += source.Name + "|" + source.Link + "\n";
+            }
+
+            File.WriteAllText(Constants.SourcesFile, toWrite);
         }
 
         private static void AddSource(string[] sources)
@@ -48,7 +84,8 @@ namespace sharpie
            //Pull all the given sources, and add them to the source file.
             foreach (string source in sources)
             {
-                Console.WriteLine(source);
+                Console.WriteLine("Attempting to add source with link \"" + source + "\".");
+
                 //Connect and stream source.
                 //TODO: Catch the stream failing due to bad address.
                 var client = new WebClient();
@@ -67,14 +104,44 @@ namespace sharpie
 
                 //Writing source contents into source directory.
                 File.WriteAllText(Constants.SourcesLocation + sourceName + ".txt", srcString);
+                Console.WriteLine("Successfully added source \"" + sourceName + "\".");
             }
 
             Console.WriteLine("Added the given sources to Sharpie.\nCount: " + sources.Length);
         }
 
+        /// <summary>
+        /// Gets a list of sources from the base sources.txt file.
+        /// </summary>
+        /// <returns>A list of Source structs.</returns>
         public static List<Source> GetSources()
         {
+            var sources = new List<Source>();
 
+            //Iterating through lines in the sources.txt file.
+            //Open file, read per line.
+            var sr = new StreamReader(Constants.SourcesFile);
+            string line = ""; int lineNum = 1;
+            while ((line = sr.ReadLine()) != null)
+            {
+                //Split by name and link.
+                string[] srcInfo = line.Replace(" ", "").Split("|");
+
+                //Add to list.
+                try
+                {
+                    sources.Add(new Source() { Name = srcInfo[0], Link = srcInfo[1], Priority = lineNum });
+                } catch
+                {
+                    Console.WriteLine("S_ERR: Error parsing source in sources.txt, at line " + lineNum + "." +
+                        "\nThis must be resolved by clearing the sources file, by using:\n" +
+                        "\"sharpie sources clear\".");
+                    Environment.Exit(0);
+                }
+            }
+
+            sr.Close();
+            return sources;
         }
 
         private static void Update()
@@ -86,6 +153,7 @@ namespace sharpie
     public struct Source
     {
         public string Name;
+        public string Link;
         public int Priority;
     }
 }
