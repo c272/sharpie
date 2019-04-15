@@ -13,7 +13,7 @@ namespace sharpie
             //No arguments, just show version.
             if (args.Length==0)
             {
-                Console.WriteLine("Sharpie, v" + version + ".\nUpdate with --update, or add parameters (--help).");
+                Console.WriteLine("Sharpie, v" + version + ".\nUpdate with --update, or add parameters (help).");
                 return;
             }
 
@@ -37,24 +37,24 @@ namespace sharpie
                     break;
                 case "remove":
                     //Uninstall a given package.
-                    Packages.RemovePackage(args.Slice(1, -1));
+                    Packages.RemovePackage(args[1]);
                     break;
-                case "config":
-                    //Configure a given package.
-                    Packages.ConfigPackage(args.Slice(1, -1));
+                case "update":
+                    //Update a given package.
+                    Packages.UpdatePackage(args.Slice(1, -1));
                     break;
-                case "--help":
+                case "help":
                     //Log the help description, or a specific page. 
-                    LogHelp(args.Slice(1, -1));
+                    LogHelp(args[1]);
                     break;
                 default:
                     //No command with that name, print error.
-                    Console.WriteLine("S_ERR: No command with the name \"" + args[0] + "\" exists.\nUse \"sharpie --help\" for more information.");
+                    Console.WriteLine("S_ERR: No command with the name \"" + args[0] + "\" exists.\nUse \"sharpie help\" for more information.");
                     return;
             }
         }
 
-        private static void LogHelp(string[] v)
+        private static void LogHelp(string pageOrFunc)
         {
             throw new NotImplementedException();
         }

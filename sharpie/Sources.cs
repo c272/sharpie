@@ -28,11 +28,14 @@ namespace sharpie
                     RemoveSource(args.Slice(1, -1));
                     break;
                 case "update":
-                    Update();
+                    UpdateSources();
+                    break;
+                case "clear":
+                    ClearSources();
                     break;
                 default:
                     Console.WriteLine("S_ERR: Invalid parameter passed to sources.\n" +
-                        "For more information on sources, use --help sources");
+                        "For more information on sources, use \"sharpie help sources\".");
                     break;
             }
         }
@@ -42,7 +45,7 @@ namespace sharpie
         /// </summary>
         private static void ListSources()
         {
-            Console.WriteLine("Sharpie \"sources.txt\" List");
+            Console.WriteLine("Sharpie Source Master List");
             Console.WriteLine("----------------------------");
             Console.WriteLine("FORMAT: Name | Source | Priority");
 
@@ -66,6 +69,9 @@ namespace sharpie
                 if (sourcesList.RemoveAll(x => x.Name == source)==0)
                 {
                     Console.WriteLine("S_ERR: Failed to remove source \"" + source + "\", does not exist in sources.txt master list.");
+                } else
+                {
+                    Console.WriteLine("Successfully removed source \"" + source + "\".");
                 }
             }
 
@@ -87,14 +93,21 @@ namespace sharpie
                 Console.WriteLine("Attempting to add source with link \"" + source + "\".");
 
                 //Connect and stream source.
-                //TODO: Catch the stream failing due to bad address.
-                var client = new WebClient();
-                Stream stream = client.OpenRead(source);
-                var sr = new StreamReader(stream);
+                string srcString = "";
+                try
+                {
+                    var client = new WebClient();
+                    Stream stream = client.OpenRead(source);
+                    var sr = new StreamReader(stream);
 
-                //Read text to memory.
-                string srcString = sr.ReadToEnd();
-                sr.Close();
+                    //Read text to memory.
+                    srcString = sr.ReadToEnd();
+                    sr.Close();
+                } catch
+                {
+                    Console.WriteLine("S_ERR: Failed to pull from the given source link.\nSource not available, or an incorrect link.");
+                    Environment.Exit(0);
+                }
 
                 //Getting the name of the source file and adding to sources list file.
                 string sourceName = srcString.Split("\n")[0];
@@ -106,8 +119,6 @@ namespace sharpie
                 File.WriteAllText(Constants.SourcesLocation + sourceName + ".txt", srcString);
                 Console.WriteLine("Successfully added source \"" + sourceName + "\".");
             }
-
-            Console.WriteLine("Added the given sources to Sharpie.\nCount: " + sources.Length);
         }
 
         /// <summary>
@@ -144,9 +155,16 @@ namespace sharpie
             return sources;
         }
 
-        private static void Update()
+        private static void UpdateSources()
         {
             throw new NotImplementedException();
+        }
+
+        private static void ClearSources()
+        {
+            //Write blank to the sources file.
+            File.WriteAllText(Constants.SourcesFile, "");
+            Console.WriteLine("Cleared all sources from the source master list.");
         }
     }
 

@@ -9,14 +9,26 @@ namespace sharpie
 {
     public class Packages
     {
-        public static void ConfigPackage(string[] v)
+        public static void UpdatePackage(string[] v)
         {
             throw new NotImplementedException();
         }
 
-        public static void RemovePackage(string[] v)
+        //ADD SUPPORT FOR CLI PACKAGES!!
+        public static void RemovePackage(string package)
         {
-            throw new NotImplementedException();
+            //Checking if the given package is already installed.
+            string packageDir = Constants.WorkingDirectory + "\\packages\\" + package + "\\";
+            if (!Directory.Exists(packageDir))
+            {
+                //Already installed, send error.
+                Console.WriteLine("S_ERR: Package is not already installed.");
+                Environment.Exit(0);
+            }
+
+            //Is installed, so delete folder.
+            Directory.Delete(packageDir, true);
+            Console.WriteLine("Successfully removed package \"" + package + "\" from project.");
         }
 
         public static void AddPackage(string package)
@@ -48,11 +60,19 @@ namespace sharpie
                 );
             }
 
+            //Check if a solution file exists in the working directory.
             string workingDir = System.Environment.CurrentDirectory;
             if (Directory.GetFiles(workingDir, "*.sln").Length == 0)
             {
                 //No solution files here, therefore no project.
                 Console.WriteLine("S_ERR: No solution file found, cannot install package.");
+                Environment.Exit(0);
+            }
+
+            //Check if the package is already installed.
+            if (Directory.Exists(workingDir+"\\packages\\"+package+"\\"))
+            {
+                Console.WriteLine("S_ERR: Package is already installed for this solution.\nUse \"sharpie update [package]\" to update.");
                 Environment.Exit(0);
             }
 
@@ -97,7 +117,7 @@ namespace sharpie
             {
                 //No sources.
                 Console.WriteLine("S_ERR: No sources to pull packages from. Add sources by using:\n" +"\"sharpie sources add [url]\"" +
-                    "\nFor more information, use --help packages.");
+                    "\nFor more information, use \"sharpie help packages\".");
                 Environment.Exit(0);
             }
 
