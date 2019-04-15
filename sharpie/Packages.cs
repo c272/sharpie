@@ -23,11 +23,6 @@ namespace sharpie
         {
             //Opening the sources file, checking for packages.
             List<Package> pkgs = GetPackages();
-            Console.WriteLine(pkgs.Count);
-            foreach (var pkg in pkgs)
-            {
-                Console.WriteLine(pkg.Name+" | "+pkg.Link+" | "+pkg.Source);
-            }
 
             //Checking if the given package exists.
             string link = "";
@@ -41,15 +36,24 @@ namespace sharpie
                     link = pkg.Link;
                     pkgType = pkg.Type;
                     found = true;
+                    Console.WriteLine("Adding package \"" + pkg.Name + "\", from source \"" + pkg.Source +"\"...");
                 }
             }
 
             //Not found.
             if (!found)
             {
-                Console.WriteLine("SHARPIE: Invalid package name given, not in any source."
+                Console.WriteLine("S_ERR: Invalid package name given, not in any source."
                     +"\nHave you added the correct sources? If so, the requested package may be unavailable."
                 );
+            }
+
+            string workingDir = System.Environment.CurrentDirectory;
+            if (Directory.GetFiles(workingDir, "*.sln").Length == 0)
+            {
+                //No solution files here, therefore no project.
+                Console.WriteLine("S_ERR: No solution file found, cannot install package.");
+                Environment.Exit(0);
             }
 
             //Attempting to download file.
@@ -65,18 +69,13 @@ namespace sharpie
                 }
             }
 
+            //ZIP type, so a C# package.
             if (pkgType == PackageType.ZIP)
             {
                 //Unzip to the packages directory within the C# project.
-                string workingDir = System.Environment.CurrentDirectory;
-                if (Directory.GetFiles(workingDir, "*.sln").Length == 0)
-                {
-                    //No solution files here, therefore no project.
-                    Console.WriteLine("SHARPIE: No solution file found, cannot install package.");
-                }
 
                 //Unzip!
-                string packageLoc = workingDir + "package\\" + package + "\\";
+                string packageLoc = workingDir + "\\packages\\" + package + "\\";
                 Directory.CreateDirectory(packageLoc);
                 ZipFile.ExtractToDirectory("pkg.zip", packageLoc);
 
@@ -84,7 +83,7 @@ namespace sharpie
                 File.Delete("pkg.zip");
 
                 //Show success.
-                Console.WriteLine("SHARPIE: Successfully installed package \"" + package + "\".");
+                Console.WriteLine("Successfully installed package \"" + package + "\".");
             }
         }
 
@@ -97,7 +96,7 @@ namespace sharpie
             if (sources.Length == 0)
             {
                 //No sources.
-                Console.WriteLine("SHARPIE: No sources to pull packages from. Add sources by using:\n" +"\"sharpie sources add [url]\"" +
+                Console.WriteLine("S_ERR: No sources to pull packages from. Add sources by using:\n" +"\"sharpie sources add [url]\"" +
                     "\nFor more information, use --help packages.");
                 Environment.Exit(0);
             }
@@ -165,7 +164,8 @@ namespace sharpie
                         packages.Add(new Package() {
                             Name = pkgInfo[0],
                             Link = pkgInfo[1],
-                            Source = sourceName
+                            Source = sourceName,
+                            Type = pkgType
                         });
 
                         lineNum++;
@@ -173,7 +173,7 @@ namespace sharpie
                     {
                         //Invalid source at a given line. Error and exit.
                         var fi = new FileInfo(file);
-                        Console.WriteLine("SHARPIE: Invalid package given in source \"" + fi.Name + "\", at line "+lineNum+"."
+                        Console.WriteLine("S_ERR: Invalid package given in source \"" + fi.Name + "\", at line "+lineNum+"."
                             +"\nUpdating, editing or removing the source may fix the issue."
                         );
                         Environment.Exit(0);

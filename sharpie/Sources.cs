@@ -9,7 +9,14 @@ namespace sharpie
     public class Sources
     {
         public static void ManageSources(string[] args)
-        {
+        {   
+            //List all sources and exit.
+            if (args.Length==0)
+            {
+                ListSources();
+                Environment.Exit(0);
+            }
+
             //Switching for source argument.
             switch (args[0])
             {
@@ -20,10 +27,15 @@ namespace sharpie
                     RemoveSource(args.Slice(1, -1));
                     break;
                 default:
-                    Console.WriteLine("SHARPIE: Invalid parameter passed to sources.\n" +
+                    Console.WriteLine("S_ERR: Invalid parameter passed to sources.\n" +
                         "For more information on sources, use --help sources");
                     break;
             }
+        }
+
+        private static void ListSources()
+        {
+            throw new NotImplementedException();
         }
 
         private static void RemoveSource(string[] sources)
@@ -60,9 +72,20 @@ namespace sharpie
             Console.WriteLine("Added the given sources to Sharpie.\nCount: " + sources.Length);
         }
 
+        public static List<Source> GetSources()
+        {
+
+        }
+
         private static void Update()
         {
             throw new NotImplementedException();
         }
+    }
+
+    public struct Source
+    {
+        public string Name;
+        public int Priority;
     }
 }

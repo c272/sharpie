@@ -33,7 +33,7 @@ namespace sharpie
                     break;
                 case "add":
                     //Install a given package.
-                    Packages.AddPackage(args.Slice(1, -1));
+                    Packages.AddPackage(args[1]);
                     break;
                 case "remove":
                     //Uninstall a given package.
@@ -49,7 +49,7 @@ namespace sharpie
                     break;
                 default:
                     //No command with that name, print error.
-                    Console.WriteLine("SHARPIE: No command with the name \"" + args[0] + "\" exists.\nUse \"sharpie --help\" for more information.");
+                    Console.WriteLine("S_ERR: No command with the name \"" + args[0] + "\" exists.\nUse \"sharpie --help\" for more information.");
                     return;
             }
         }
