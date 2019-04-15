@@ -14,6 +14,7 @@ namespace sharpie
             throw new NotImplementedException();
         }
 
+        //Removes a package from either the current project or the PATH.
         //ADD SUPPORT FOR CLI PACKAGES!!
         public static void RemovePackage(string package)
         {
@@ -105,6 +106,50 @@ namespace sharpie
                 //Show success.
                 Console.WriteLine("Successfully installed package \"" + package + "\".");
             }
+        }
+
+        /// <summary>
+        /// List all of the installed packages in PATH, and at location.
+        /// </summary>
+        public static void List()
+        {
+            var local_packages = new List<string>();
+            var path_packages = new List<string>();
+
+            //Getting packages from current directory.
+            if (Directory.Exists(Constants.WorkingDirectory+"\\packages\\"))
+            {
+                //Grabbing.
+                local_packages.AddRange(Directory.GetDirectories(Constants.WorkingDirectory + "\\packages\\"));
+            }
+
+            //Getting PATH packages.
+            string[] packageFileNames = Directory.GetFiles(Constants.PackagesLocation);
+            foreach (var pkg in packageFileNames)
+            {
+                path_packages.Add(pkg.Replace(".exe", ""));
+            }
+
+            //Printing!
+            Console.WriteLine("Sharpie Packages Master List:");
+            Console.WriteLine("-----------------------------");
+            foreach (var pkg in path_packages)
+            {
+                var di = new DirectoryInfo(pkg);
+                Console.WriteLine(di.Name);
+            }
+            if (path_packages.Count == 0) { Console.WriteLine("None installed."); }
+
+            Console.WriteLine("-----------------------------");
+            Console.WriteLine("\nSharpie Packages (Local):");
+            Console.WriteLine("-----------------------------");
+            foreach (var pkg in local_packages)
+            {
+                var di = new DirectoryInfo(pkg);
+                Console.WriteLine(di.Name);
+            }
+            if (local_packages.Count == 0) { Console.WriteLine("None installed."); }
+            Console.WriteLine("-----------------------------");
         }
 
         private static List<Package> GetPackages()

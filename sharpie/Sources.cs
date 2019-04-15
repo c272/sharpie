@@ -157,7 +157,11 @@ namespace sharpie
 
         private static void UpdateSources()
         {
-            throw new NotImplementedException();
+            //Attempt to update all the sources.
+            foreach (Source source in GetSources())
+            {
+
+            }
         }
 
         private static void ClearSources()
