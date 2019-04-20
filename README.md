@@ -1,3 +1,4 @@
+# Sharpie
 *A C# package manager without the useless fluff.*
 
 ## Getting Started
