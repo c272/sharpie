@@ -2,7 +2,7 @@
 *A C# package manager without the useless fluff.*
 
 ## Getting Started
-To get started adding packages to your C# projects or PATH, first download the latest release of Sharpie from the [releases tab]() on GitHub. When this is done, extract the release into a folder, and then add that folder to the PATH environment variable.
+To get started adding packages to your C# projects or PATH, first download the latest release of Sharpie from the [releases tab](https://github.com/c272/sharpie/releases) on GitHub. When this is done, extract the release into a folder, and then add that folder to the PATH environment variable.
 
 (*If you don't know how to do that, you can check [here.](https://docs.alfresco.com/4.2/tasks/fot-addpath.html)*)
 
