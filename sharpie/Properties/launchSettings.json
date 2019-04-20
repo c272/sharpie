@@ -2,7 +2,7 @@
   "profiles": {
     "sharpie": {
       "commandName": "Project",
-      "commandLineArgs": "help"
+      "commandLineArgs": "remove testExe"
     }
   }
 }

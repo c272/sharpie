@@ -9,30 +9,90 @@ namespace sharpie
 {
     public class Packages
     {
-        public static void UpdatePackage(string[] v)
+        public static void UpdatePackage(string[] packages)
         {
-            throw new NotImplementedException();
+            //Loop over individual packages, attempt to pull from source.
+            List<Package> pkgList = GetPackages();
+            foreach (var package in packages)
+            {
+                //Check it exists in sources, and is already installed.
+                int pkgIndex = pkgList.FindIndex(x => x.Name == package);
+                string packageDir = Constants.WorkingDirectory + "\\packages\\" + package + "\\";
+                if (pkgIndex==-1 || !Directory.Exists(packageDir))
+                {
+                    Console.WriteLine("S_ERR: Requested package \"" + package + "\" not installed or not available from any sources.");
+                    continue;
+                }
+                
+                //Attempt to update it.
+                RemovePackage(package, true);
+                AddPackage(package, true);
+                Console.WriteLine("Successfully updated package \"" + package + "\".");
+            }
         }
 
         //Removes a package from either the current project or the PATH.
         //ADD SUPPORT FOR CLI PACKAGES!!
-        public static void RemovePackage(string package)
+        public static void RemovePackage(string package, bool silent=false)
         {
             //Checking if the given package is already installed.
             string packageDir = Constants.WorkingDirectory + "\\packages\\" + package + "\\";
-            if (!Directory.Exists(packageDir))
-            {
-                //Already installed, send error.
-                Console.WriteLine("S_ERR: Package is not already installed.");
+            //Getting package from list.
+            int pkgIndex = GetPackages().FindIndex(x => x.Name == package);
+            if (pkgIndex==-1) { Console.WriteLine("S_ERR: Package does not exist in master list.");
                 Environment.Exit(0);
+            }
+            Package pkgInfo = GetPackages()[pkgIndex];
+
+            //Safechecking directory.
+            bool pkgDirNonexistant = false;
+            try
+            {
+                pkgDirNonexistant = !Directory.Exists(packageDir);
+            }
+            catch { }
+
+            if (pkgDirNonexistant)
+            {
+                //Checking if the package is a PATH executable package.
+                string exeLoc = Constants.PackagesLocation + package + ".exe";
+                if (File.Exists(exeLoc))
+                {
+                    //Delete package.
+                    try
+                    {
+                        File.Delete(exeLoc);
+                        if (!silent)
+                        {
+                            Console.WriteLine("Successfully removed package \"" + package + "\".");
+                        }
+                    } catch
+                    {
+                        Console.WriteLine("S_ERR: Failed to delete package executable. Reboot and try again.");
+                        Environment.Exit(0);
+                    }
+                }
+                else
+                {
+                    //Not already installed, send error.
+                    Console.WriteLine("S_ERR: Package is not already installed.");
+                    Environment.Exit(0);
+                }
             }
 
             //Is installed, so delete folder.
-            Directory.Delete(packageDir, true);
-            Console.WriteLine("Successfully removed package \"" + package + "\" from project.");
+            if (pkgInfo.Type==PackageType.ZIP)
+            {
+                Directory.Delete(packageDir, true);
+            }
+
+            if (!silent && pkgInfo.Type==PackageType.ZIP)
+            {
+                Console.WriteLine("Successfully removed package \"" + package + "\" from project.");
+            }
         }
 
-        public static void AddPackage(string package)
+        public static void AddPackage(string package, bool silent=false)
         {
             //Opening the sources file, checking for packages.
             List<Package> pkgs = GetPackages();
@@ -49,7 +109,10 @@ namespace sharpie
                     link = pkg.Link;
                     pkgType = pkg.Type;
                     found = true;
-                    Console.WriteLine("Adding package \"" + pkg.Name + "\", from source \"" + pkg.Source +"\"...");
+                    if (!silent)
+                    {
+                        Console.WriteLine("Adding package \"" + pkg.Name + "\", from source \"" + pkg.Source + "\"...");
+                    }
                 }
             }
 
@@ -59,11 +122,12 @@ namespace sharpie
                 Console.WriteLine("S_ERR: Invalid package name given, not in any source."
                     +"\nHave you added the correct sources? If so, the requested package may be unavailable."
                 );
+                Environment.Exit(0);
             }
 
             //Check if a solution file exists in the working directory.
             string workingDir = System.Environment.CurrentDirectory;
-            if (Directory.GetFiles(workingDir, "*.sln").Length == 0)
+            if (Directory.GetFiles(workingDir, "*.sln").Length == 0 && pkgType == PackageType.ZIP)
             {
                 //No solution files here, therefore no project.
                 Console.WriteLine("S_ERR: No solution file found, cannot install package.");
@@ -71,7 +135,7 @@ namespace sharpie
             }
 
             //Check if the package is already installed.
-            if (Directory.Exists(workingDir+"\\packages\\"+package+"\\"))
+            if (Directory.Exists(workingDir+"\\packages\\"+package+"\\") && pkgType == PackageType.ZIP)
             {
                 Console.WriteLine("S_ERR: Package is already installed for this solution.\nUse \"sharpie update [package]\" to update.");
                 Environment.Exit(0);
@@ -82,11 +146,29 @@ namespace sharpie
             {
                 if (pkgType == PackageType.ZIP)
                 {
-                    client.DownloadFile(link, "pkg.zip");
+                    try
+                    {
+                        client.DownloadFile(link, "pkg.zip");
+                    } catch
+                    {
+                        Console.WriteLine("S_ERR: Could not pull package from source, unavailable or broken.");
+                        Environment.Exit(0);
+                    }
                 }
                 if (pkgType == PackageType.EXE)
                 {
-                    client.DownloadFile(link, Constants.PackagesLocation + package + ".exe");
+                    try
+                    {
+                        client.DownloadFile(link, Constants.PackagesLocation + package + ".exe");
+                    } catch
+                    {
+                        Console.WriteLine("S_ERR: Could not pull package from source, unavailable or broken.");
+                        Environment.Exit(0);
+                    }
+                    if (!silent)
+                    {
+                        Console.WriteLine("Successfully installed package \"" + package + "\".");
+                    }
                 }
             }
 
@@ -94,8 +176,6 @@ namespace sharpie
             if (pkgType == PackageType.ZIP)
             {
                 //Unzip to the packages directory within the C# project.
-
-                //Unzip!
                 string packageLoc = workingDir + "\\packages\\" + package + "\\";
                 Directory.CreateDirectory(packageLoc);
                 ZipFile.ExtractToDirectory("pkg.zip", packageLoc);
@@ -104,7 +184,10 @@ namespace sharpie
                 File.Delete("pkg.zip");
 
                 //Show success.
-                Console.WriteLine("Successfully installed package \"" + package + "\".");
+                if (!silent)
+                {
+                    Console.WriteLine("Successfully installed package \"" + package + "\".");
+                }
             }
         }
 

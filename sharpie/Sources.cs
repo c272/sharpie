@@ -58,7 +58,7 @@ namespace sharpie
             Console.WriteLine("----------------------------");
         }
 
-        private static void RemoveSource(string[] sources)
+        private static void RemoveSource(string[] sources, bool silent=false)
         {
             //Get the sources from file.
             List<Source> sourcesList = GetSources();
@@ -69,9 +69,23 @@ namespace sharpie
                 if (sourcesList.RemoveAll(x => x.Name == source)==0)
                 {
                     Console.WriteLine("S_ERR: Failed to remove source \"" + source + "\", does not exist in sources.txt master list.");
+                    Environment.Exit(0);
                 } else
                 {
-                    Console.WriteLine("Successfully removed source \"" + source + "\".");
+                    //Removing source text file.
+                    try
+                    {
+                        File.Delete(Constants.SourcesLocation + source + ".txt");
+                    } catch
+                    {
+                        Console.WriteLine("S_ERR: Failed to remove source \"" + source + "\", could not delete source text. Please reboot and try again.");
+                        Environment.Exit(0);
+                    }
+
+                    if (!silent)
+                    {
+                        Console.WriteLine("Successfully removed source \"" + source + "\".");
+                    }
                 }
             }
 
@@ -85,12 +99,15 @@ namespace sharpie
             File.WriteAllText(Constants.SourcesFile, toWrite);
         }
 
-        private static void AddSource(string[] sources)
+        private static void AddSource(string[] sources, bool silent=false)
         {
            //Pull all the given sources, and add them to the source file.
             foreach (string source in sources)
             {
-                Console.WriteLine("Attempting to add source with link \"" + source + "\".");
+                if (!silent)
+                {
+                    Console.WriteLine("Attempting to add source with link \"" + source + "\".");
+                }
 
                 //Connect and stream source.
                 string srcString = "";
@@ -109,15 +126,28 @@ namespace sharpie
                     Environment.Exit(0);
                 }
 
-                //Getting the name of the source file and adding to sources list file.
+                //Getting the name of the source file.
                 string sourceName = srcString.Split("\n")[0];
+
                 //Clearing rubbish from the source name.
-                sourceName = sourceName.Replace("\r", "").Replace("\n", "");
+                sourceName = sourceName.Replace("\r", "").Replace("\n", "").Replace(" ", "");
+
+                //Checking if the source is already added.
+                if (GetSources().FindIndex(x => x.Name==sourceName)!=-1)
+                {
+                    Console.WriteLine("S_ERR: Source with the same name is already added. Please remove it before adding a new one.");
+                    Environment.Exit(0);
+                }
+
+                //Add to source file.
                 File.AppendAllText(Constants.SourcesFile, sourceName + "|" + source + "\n");
 
                 //Writing source contents into source directory.
                 File.WriteAllText(Constants.SourcesLocation + sourceName + ".txt", srcString);
-                Console.WriteLine("Successfully added source \"" + sourceName + "\".");
+                if (!silent)
+                {
+                    Console.WriteLine("Successfully added source \"" + sourceName + "\".");
+                }
             }
         }
 
@@ -157,10 +187,12 @@ namespace sharpie
 
         private static void UpdateSources()
         {
-            //Attempt to update all the sources.
+            //Attempt to grab all the source text files.
             foreach (Source source in GetSources())
             {
-
+                RemoveSource(new string[] { source.Name }, true);
+                AddSource(new string[] { source.Link }, true);
+                Console.WriteLine("Successfully updated source \"" + source.Name + "\".");
             }
         }
 
