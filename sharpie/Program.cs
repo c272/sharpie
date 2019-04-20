@@ -6,7 +6,7 @@ namespace sharpie
 {
     class Program
     {
-        public static double version = 0.1;
+        public static double version = 0.2;
 
         static void Main(string[] args)
         {
