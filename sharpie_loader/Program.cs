@@ -18,6 +18,7 @@ namespace sharpie_loader
                 {
                     try
                     {
+                        Console.WriteLine("Attempting to pull latest version...");
                         client.DownloadFile("https://github.com/c272/sharpie/raw/master/latest/sharpie_ex.exe", "sharpie_ex.exe");
                         client.DownloadFile("https://github.com/c272/sharpie/raw/master/latest/sharpie_ex.dll", "sharpie_ex.dll");
                         Console.WriteLine("Successfully pulled the latest Sharpie build from the master update source.");

@@ -67,19 +67,46 @@ namespace sharpie
 
         private static void LogHelp(string pageOrFunc)
         {
-            if (pageOrFunc=="")
+            switch (pageOrFunc)
             {
-                //Default page, print default advice.
-                Console.WriteLine("Sharpie Commands:\n" +
-                    "sources - Lists all installed sources, locally and globally.\n" +
-                    "sources add [link] - Adds a given source link to the source master list.\n" +
-                    "sources remove [name] - Removes a given source by its name.\n" +
-                    "sources update - Updates all the sources in the source master list.\n" +
-                    "add [package] - Adds a given package to the local C# project, or the global PATH.\n" +
-                    "remove [package] - Removes a given package from the local C# project, or the global PATH.\n" +
-                    "update [package] - Updates a given package from the local C# project, or the global PATH.\n" +
-                    "listpkg - Lists the installed packages locally, and on the global PATH.\n" +
-                    "--update - Updates Sharpie to the latest version.");
+                case "":
+                    //Default page, print default advice.
+                    Console.WriteLine("Sharpie Commands:\n" +
+                        "sources - Lists all installed sources, locally and globally.\n" +
+                        "sources add [link] - Adds a given source link to the source master list.\n" +
+                        "sources remove [name] - Removes a given source by its name.\n" +
+                        "sources update - Updates all the sources in the source master list.\n" +
+                        "add [package] - Adds a given package to the local C# project, or the global PATH.\n" +
+                        "remove [package] - Removes a given package from the local C# project, or the global PATH.\n" +
+                        "update [package] - Updates a given package from the local C# project, or the global PATH.\n" +
+                        "listpkg - Lists the installed packages locally, and on the global PATH.\n" +
+                        "--update - Updates Sharpie to the latest version.");
+                    break;
+                case "sources":
+                    Console.WriteLine("Command Reference - Sources\n" +
+                        "-----------\n"+
+                        "Sources are the place that Sharpie attempts to find packages from. This means\n"+
+                        "before you can install packages, you need to add the relevant source lists.\n"+
+                        "-----------\n"+
+                        "sources - Lists all installed sources, locally and globally.\n" +
+                        "sources add [link] - Adds a given source link to the source master list.\n" +
+                        "sources remove [name] - Removes a given source by its name.\n" +
+                        "sources update - Updates all the sources in the source master list.");
+                    break;
+                case "packages":
+                    Console.WriteLine("Command Reference - Packages\n" +
+                        "-----------\n" +
+                        "Packages are bite-size modules you can install and can come in several forms, such as\n" +
+                        "C# class libraries, terminal programs, and more.\n" +
+                        "-----------\n" +
+                        "add [package] - Adds a given package to the local C# project, or the global PATH.\n" +
+                        "remove [package] - Removes a given package from the local C# project, or the global PATH.\n" +
+                        "update [package] - Updates a given package from the local C# project, or the global PATH.\n" +
+                        "listpkg - Lists the installed packages locally, and on the global PATH.");
+                    break;
+                default:
+                    Console.WriteLine("No command reference found for \"" + pageOrFunc + "\".");
+                    break;
             }
         }
     }
