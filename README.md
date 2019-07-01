@@ -1,5 +1,6 @@
 # Sharpie
 *A C# package manager without the useless fluff.*
+
 **This repository is now being maintained as part of the Algo project, [here.](http://github.com/c272/algo-lang) This repository is no longer updated.**
 
 ## Getting Started
